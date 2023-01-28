@@ -1,4 +1,5 @@
 {
+  "printWidth": 55,
   "singleQuote": true,
   "trailingComma": "all"
 }
