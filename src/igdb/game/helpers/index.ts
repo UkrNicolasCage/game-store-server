@@ -1,0 +1,1 @@
+export { buildGamesPrevsList } from './buildGamesPrevsList';
