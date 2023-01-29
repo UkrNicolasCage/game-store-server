@@ -7,9 +7,9 @@ import {
 export class AuthDto {
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  readonly email: string;
 
   @IsString()
   @IsNotEmpty()
-  password: string;
+  readonly password: string;
 }
