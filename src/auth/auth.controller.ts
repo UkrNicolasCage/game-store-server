@@ -5,6 +5,9 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  Patch,
+  UseGuards,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
@@ -24,7 +27,7 @@ export class AuthController {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
-    delete userData.tokens.accessToken;
+    delete userData.tokens.refreshToken;
     return userData;
   }
 
@@ -40,8 +43,39 @@ export class AuthController {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
-    
-    delete userData.tokens.accessToken;
+
+    delete userData.tokens.refreshToken;
     return userData;
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Patch('logout')
+  logout(@Res({ passthrough: true }) res) {
+    const { refreshToken } = res.req.cookies;
+
+    this.authService.logout(refreshToken);
+    res.clearCookie('refreshToken');
+    return res.redirect(process.env.CLIENT_URL + '/signin');
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('refresh')
+  async refresh(@Res({ passthrough: true }) res) {
+    const { refreshToken } = res.req.cookies;
+    const userData = await this.authService.refresh(
+      refreshToken,
+    );
+
+    res.cookie('refreshToken', userData.tokens.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
+
+    delete userData.tokens.refreshToken;
+    return userData;
+  }
+
 }
+
+
+

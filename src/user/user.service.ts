@@ -31,7 +31,8 @@ export class UserService {
     user.isActivated = true;
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { isActivated: true },
+      data: { isActivated: true, activationLink: null },
     });
   }
+  
 }

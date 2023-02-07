@@ -5,7 +5,7 @@ export class ApiExeption extends HttpException {
     super(message, status);
   }
 
-  static BadRequest(arg0: string, arg1: string) {
+  static BadRequest() {
     return new ApiExeption(
       HttpStatus.BAD_REQUEST,
       'User is not found',

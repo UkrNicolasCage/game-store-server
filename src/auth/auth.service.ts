@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { TokenService } from './token/token.service';
 import { MailService } from 'src/mail/mail.service';
 import { User } from '@prisma/client';
+import { ApiExeption } from 'src/user/exeptions/ApiError.exception';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -42,13 +44,9 @@ export class AuthService {
         });
 
       // generate tokens
-      const userDto = createAndSaveTokens(
-        user,
-        this.tokenService,
-      );
-
-      delete user.hash;
-      return userDto;
+      
+      const userDto = createUserDto(user);
+      return this.tokenService.createAndSaveTokens(userDto);
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
@@ -77,24 +75,43 @@ export class AuthService {
         throw new ForbiddenException('User not activated');
       }
 
-      const userDto = createAndSaveTokens(
-        user,
-        this.tokenService,
-      );
-
-      delete user.hash;
-      return userDto;
+      
+      const userDto = createUserDto(user);
+      return this.tokenService.createAndSaveTokens(userDto);
     } catch (e) {
       throw new ForbiddenException('Credentials incorrect');
     }
   }
+  logout(refreshToken: string) {
+    return this.tokenService.removeRefreshToken(refreshToken);
+  }
+
+  async refresh(refreshToken: string) {
+    if (!refreshToken) {
+      throw ApiExeption.UnauthorizedError();
+    }
+
+    try {
+      const tokenData = await this.tokenService.findRefreshToken(
+        refreshToken,
+      );
+
+      const userData = await this.prisma.user.findFirst({
+        where: {
+          id: tokenData.userId,
+        },
+      });
+      
+      const userDto = createUserDto(userData);
+      return this.tokenService.createAndSaveTokens(userDto);
+    } catch (e) {
+      throw ApiExeption.UnauthorizedError();
+    }
+  }
 }
 
-async function createAndSaveTokens(
-  user: User,
-  tokenService: TokenService,
-) {
-  const userDto = {
+function createUserDto(user: User) {
+  return {
     userId: user.id,
     isActivated: user.isActivated,
     hash: user.hash,
@@ -102,15 +119,4 @@ async function createAndSaveTokens(
     email: user.email,
     username: user.username,
   };
-
-  const tokens = await tokenService.generateTokens({
-    ...userDto,
-  });
-
-  await tokenService.saveRefreshToken(
-    user.id,
-    tokens.refreshToken,
-  );
-
-  return { tokens, ...userDto };
 }
