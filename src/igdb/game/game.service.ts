@@ -22,6 +22,7 @@ export class GameService {
           data: `fields *; offset ${dto.offset}; limit ${dto.limit};`,
         })
         .then((response) => {
+          console.log(response.data);
           return response.data;
         });
 
@@ -47,7 +48,7 @@ export class GameService {
           .then((response) => {
             return response.data;
           });
-          
+
       return buildGamesPrevsList(games, gamesCovers);
     } catch (err) {
       console.error(err);

@@ -4,6 +4,7 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
@@ -14,13 +15,33 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('signup')
-  signup(@Body() dto: AuthDto) {
-    return this.authService.signup(dto);
+  async signup(
+    @Body() dto: AuthDto,
+    @Res({ passthrough: true }) res,
+  ) {
+    const userData = await this.authService.signup(dto);
+    res.cookie('refreshToken', userData.tokens.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
+    delete userData.tokens.accessToken;
+    return userData;
   }
 
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('signin')
-  signin(@Body() dto: AuthDto) {
-    return this.authService.signin(dto);
+  async signin(
+    @Body() dto: AuthDto,
+    @Res({ passthrough: true }) res,
+  ) {
+    const userData = await this.authService.signin(dto);
+
+    res.cookie('refreshToken', userData.tokens.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
+    
+    delete userData.tokens.accessToken;
+    return userData;
   }
 }

@@ -15,12 +15,27 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email String @unique 
-  hash  String 
+  email    String  @unique
+  hash     String
+  age      Int
+  username String @unique
+  isActivated Boolean @default(false)
+  activationLink String? @unique
 
-  firstName String?
-  lastName  String?
-  username  String? @unique
+  Token    Token?
 
   @@map("users")
+}
+
+model Token {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshToken String @unique
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("tokens")
 }

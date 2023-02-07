@@ -13,9 +13,19 @@ export const buildGamesPrevsList = (
       let currentCover = covers.find(
         (cover: GameCover) => cover.id === game.cover,
       );
-      const coverUrl = currentCover
-        ? currentCover.url
-        : 'https://via.placeholder.com/150';
+      let coverUrl = '';
+      if (currentCover) {
+        // change url size from 90 x 90 to 264 x 374
+        const urlNormalSize = currentCover.url.replace(
+          'thumb',
+          'cover_big',
+        );
+        //
+        coverUrl = urlNormalSize;
+      } else {
+        coverUrl = 'https://via.placeholder.com/150';
+      }
+
       return {
         id: game.id,
         name: game.name,
