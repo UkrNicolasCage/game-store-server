@@ -40,6 +40,6 @@ export class UserController {
   ) {
     await this.userService.activate(link);
 
-    res.redirect(process.env.CLIENT_URL);
+    res.redirect(process.env.CLIENT_URL+"/signin");
   }
 }

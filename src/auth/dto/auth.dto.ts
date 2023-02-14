@@ -8,7 +8,7 @@ import {
   Min,
 } from 'class-validator';
 
-export class AuthDto {
+export class SignupDto {
   @IsEmail()
   @IsNotEmpty()
   readonly email: string;
@@ -19,9 +19,20 @@ export class AuthDto {
 
   @IsNotEmpty()
   @IsInt()
-  @Max(99)
-  @Min(9)
+  @Max(100)
+  @Min(7)
   readonly age: number;
+
+  @IsNotEmpty()
+  @IsString()
+  @Length(8, 20)
+  readonly password: string;
+}
+
+export class SigninDto {
+  @IsEmail()
+  @IsNotEmpty()
+  readonly email: string;
 
   @IsNotEmpty()
   @IsString()

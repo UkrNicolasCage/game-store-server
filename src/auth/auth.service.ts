@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuthDto } from './dto';
+import { SigninDto, SignupDto } from './dto';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +17,8 @@ export class AuthService {
     private mailService: MailService,
   ) {}
 
-  async signup(dto: AuthDto) {
+  async signup(dto: SignupDto) {
+    console.log(dto);
     const hash = await argon.hash(dto.password);
     const activationCode = uuidv4();
 
@@ -44,7 +45,7 @@ export class AuthService {
         });
 
       // generate tokens
-      
+
       const userDto = createUserDto(user);
       return this.tokenService.createAndSaveTokens(userDto);
     } catch (e) {
@@ -57,7 +58,8 @@ export class AuthService {
     }
   }
 
-  async signin(dto: AuthDto) {
+  async signin(dto: SigninDto) {
+   
     try {
       const user = await this.prisma.user.findFirstOrThrow({
         where: {
@@ -74,8 +76,7 @@ export class AuthService {
       if (!user.isActivated) {
         throw new ForbiddenException('User not activated');
       }
-
-      
+      console.log("fdfdf")
       const userDto = createUserDto(user);
       return this.tokenService.createAndSaveTokens(userDto);
     } catch (e) {
@@ -101,7 +102,7 @@ export class AuthService {
           id: tokenData.userId,
         },
       });
-      
+
       const userDto = createUserDto(userData);
       return this.tokenService.createAndSaveTokens(userDto);
     } catch (e) {

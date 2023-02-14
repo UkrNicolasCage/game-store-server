@@ -10,7 +10,7 @@ import {
   Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dto';
+import { SigninDto, SignupDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -19,22 +19,22 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('signup')
   async signup(
-    @Body() dto: AuthDto,
+    @Body() dto: any,
     @Res({ passthrough: true }) res,
   ) {
+
     const userData = await this.authService.signup(dto);
     res.cookie('refreshToken', userData.tokens.refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
-    delete userData.tokens.refreshToken;
     return userData;
   }
 
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('signin')
   async signin(
-    @Body() dto: AuthDto,
+    @Body() dto: SigninDto,
     @Res({ passthrough: true }) res,
   ) {
     const userData = await this.authService.signin(dto);
@@ -43,8 +43,6 @@ export class AuthController {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
-
-    delete userData.tokens.refreshToken;
     return userData;
   }
 
@@ -71,11 +69,6 @@ export class AuthController {
       httpOnly: true,
     });
 
-    delete userData.tokens.refreshToken;
     return userData;
   }
-
 }
-
-
-
